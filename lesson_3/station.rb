@@ -16,12 +16,8 @@ class Station
     @trains.delete(train) if train_included?(train)
   end
 
-  def passenger_trains
-    @trains.filter { |t| t.type == :passenger }.size
-  end
-
-  def cargo_trains
-    @trains.filter { |t| t.type == :cargo }.size
+  def trains_by_type(type)
+    @trains.filter { |t| t.type == type }.size
   end
 
   private
