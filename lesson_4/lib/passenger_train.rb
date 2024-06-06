@@ -1,5 +1,6 @@
-class PassengerTrain < Train
+# frozen_string_literal: true
 
+class PassengerTrain < Train
   protected
 
   def type_match?(wagon)
