@@ -130,8 +130,8 @@ def station_control(routes, stations, route = nil)
     puts 'Станция успешно добавлена в маршрут!'
   when 2
     puts 'Выберете какую станцию вы хотите удалить:'
-    route.stations.each_with_index do |station, index|
-      puts "#{index + 1} - #{station.name}"
+    route.stations.each_with_index do |s, index|
+      puts "#{index + 1} - #{s.name}"
     end
     print '> '
     station = gets.to_i
