@@ -6,7 +6,6 @@ class Train
 
   INITIAL_SPEED = 0
   PASSENGER_SPEED = 50
-  CARGO_SPEED = 45
 
   INITIAL_STATION = 0
 
@@ -71,14 +70,6 @@ class Train
     @stations[@station]
   end
 
-  protected
-
-  # метод для проверки типа
-  # проверяет равен ли тип вагона типу поезда
-  # вынесен в protected т.к. метод должен быть
-  # доступен дочерним классам для переопределения
-  def type_match?(wagon); end
-
   private
 
   # метод который проверяет можно ли прицепить вагон
@@ -92,6 +83,13 @@ class Train
   # имеет алиас can_detach?, который применяеться
   # для проверки того можно ли отцепить вагон
   alias can_detach? can_attach?
+
+  # метод проверяет равен ли тип вагона типу поезда
+  # вынесен в private так как должен быть доступен
+  # только внутри метода can_attach?/can_detach?
+  def type_match?(wagon)
+    wagon.type == type
+  end
 
   # метод который возвращает название начальной станции
   # вынесен в private т.к. метод
