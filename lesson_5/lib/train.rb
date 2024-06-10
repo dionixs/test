@@ -7,7 +7,7 @@ class Train
   @@trains ||= []
 
   def self.find(number)
-    @@trains.filter { |t| t.number == number }.first
+    @@trains.find { |t| t.number == number }
   end
 
   PASSENGER_TYPE = :passenger
