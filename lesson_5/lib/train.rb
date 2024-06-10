@@ -3,6 +3,12 @@
 class Train
   include Vendor
 
+  @@trains ||= []
+
+  def self.find(number)
+    @@trains.filter { |t| t.number == number }.first
+  end
+
   PASSENGER_TYPE = :passenger
   CARGO_TYPE = :cargo
 
@@ -20,6 +26,7 @@ class Train
     @stations = []
     @speed = INITIAL_SPEED
     @station = INITIAL_STATION
+    @@trains << self
   end
 
   def go
