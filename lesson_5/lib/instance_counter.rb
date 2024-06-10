@@ -13,8 +13,6 @@ module InstanceCounter
       @instances ||= 0
     end
 
-    private
-
     attr_writer :instances
   end
 
@@ -22,10 +20,7 @@ module InstanceCounter
     private
 
     def register_instance
-      current_instances = self.class.instances
-      # для получения доступа к instances= в private
-      # используем send
-      self.class.send(:instances=, current_instances + 1)
+      self.class.instances += 1
     end
   end
 end
