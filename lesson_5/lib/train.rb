@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Train
+  include InstanceCounter
   include Vendor
 
   @@trains ||= []
@@ -27,6 +28,7 @@ class Train
     @speed = INITIAL_SPEED
     @station = INITIAL_STATION
     @@trains << self
+    register_instance
   end
 
   def go
