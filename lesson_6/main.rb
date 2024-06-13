@@ -13,6 +13,8 @@ require_relative './lib/cargo_wagon'
 require_relative './lib/passenger_wagon'
 require_relative './seed/seed'
 
+attempt = 0
+
 routes = []
 
 def create_station
@@ -43,11 +45,13 @@ def create_train
   if Train.find(number)
     puts 'Поезд уже существует!'
   elsif type == 1
+    train = PassengerTrain.new(number)
     puts 'Поезд успешно создан!'
-    PassengerTrain.new(number)
+    train
   elsif type == 2
+    train = CargoTrain.new(number)
     puts 'Грузовой поезд успешно создан!'
-    CargoTrain.new(number)
+    train
   else
     puts 'Тип поезда неверен!'
   end
@@ -242,32 +246,42 @@ loop do
   print '> '
   input = gets.strip
 
-  case input
-  when 'exit'
-    break
-  when 'help'
-    commands
-  when '1'
-    create_station
-  when '2'
-    create_train
-  when '3'
-    create_route(routes)
-  when '4'
-    station_control(routes)
-  when '5'
-    add_route_to_train(routes)
-  when '6'
-    add_wagons_to_train
-  when '7'
-    remove_wagons_to_train
-  when '8'
-    move_train
-  when '9'
-    show_stations
-  when '10'
-    show_trains
-  else
-    puts "Команда #{input} не найдена!"
+  begin
+    case input
+    when 'exit'
+      break
+    when 'help'
+      commands
+    when '1'
+      create_station
+    when '2'
+      create_train
+    when '3'
+      create_route(routes)
+    when '4'
+      station_control(routes)
+    when '5'
+      add_route_to_train(routes)
+    when '6'
+      add_wagons_to_train
+    when '7'
+      remove_wagons_to_train
+    when '8'
+      move_train
+    when '9'
+      show_stations
+    when '10'
+      show_trains
+    else
+      puts "Команда #{input} не найдена!"
+    end
+  rescue StandardError => e
+    attempt += 1
+    puts "Возникла ошибка: #{e.message}. Попробуйте еще раз!"
+    puts "Попыток: #{attempt}" if attempt.positive?
+    retry if attempt < 3
+    puts 'Достигнуто максимальное кол-во попыток. Попробуйте позже.'
+    attempt = 0
+    next
   end
 end
