@@ -7,6 +7,10 @@ class Train
 
   @@trains ||= []
 
+  def self.all
+    @@trains
+  end
+
   def self.find(number)
     @@trains.find { |t| t.number == number }
   end
@@ -32,8 +36,8 @@ class Train
     @stations = []
     @speed = INITIAL_SPEED
     @station = INITIAL_STATION
-    @@trains << self
     validate! if instance_of?(Train)
+    @@trains << self
     register_instance
   end
 

@@ -11,28 +11,25 @@ require_relative './lib/cargo_train'
 require_relative './lib/passenger_train'
 require_relative './lib/cargo_wagon'
 require_relative './lib/passenger_wagon'
+require_relative './seed/seed'
 
-stations = []
-trains = []
 routes = []
 
-def create_station(stations)
+def create_station
   puts 'Введите название станции:'
   print '> '
-  name = gets.strip
+  name = gets.strip.capitalize
 
-  if stations.map(&:name).include?(name)
+  if Station.find(name)
     puts 'Станция уже существует!'
-    stations.filter { |s| s.name == name }.first
+    Station.find(name)
   else
     puts 'Станция успешно создана!'
-    station = Station.new(name)
-    stations << station
-    station
+    Station.new(name)
   end
 end
 
-def create_train(trains)
+def create_train
   puts 'Введите тип поезда:'
   puts ' 1 - Пассажирский поезд'
   puts ' 2 - Грузовой поезд'
@@ -43,40 +40,38 @@ def create_train(trains)
   print '> '
   number = gets.strip
 
-  if trains.map(&:number).include?(number)
+  if Train.find(number)
     puts 'Поезд уже существует!'
   elsif type == 1
-    trains << PassengerTrain.new(number)
     puts 'Поезд успешно создан!'
+    PassengerTrain.new(number)
   elsif type == 2
-    trains << CargoTrain.new(number)
-    puts 'Поезд успешно создан!'
+    puts 'Грузовой поезд успешно создан!'
+    CargoTrain.new(number)
   else
     puts 'Тип поезда неверен!'
   end
 end
 
-def create_route(routes, stations)
+def create_route(routes)
   puts 'Введите имя начальной станции или выберете ее из списка ниже:'
-  show_stations(stations)
+  show_stations
   print '> '
   start_station = gets.strip
 
   if start_station.to_i.zero?
-    start_station = Station.new(start_station)
-    stations << start_station
+    Station.new(start_station)
   else
     start_station = start_station.to_i - 1
   end
 
   puts 'Введите имя конечной станции или выберете ее из списка ниже:'
-  show_stations(stations)
+  show_stations
   print '> '
   end_station = gets.strip
 
   if end_station.to_i.zero?
-    end_station = Station.new(end_station)
-    stations << end_station
+    Station.new(end_station)
   else
     end_station = start_station.to_i - 1
   end
@@ -84,13 +79,14 @@ def create_route(routes, stations)
   if start_station == end_station
     puts 'Начальная и конечная станции совпадают!'
   else
+    stations = Station.all
     start_station = stations[start_station] if start_station.is_a?(Integer)
     end_station = stations[end_station] if end_station.is_a?(Integer)
     route = Route.new(start_station, end_station)
     routes << route
   end
 
-  station_control(routes, stations, route)
+  station_control(routes, route)
 end
 
 def choice_route(routes)
@@ -104,17 +100,17 @@ def choice_route(routes)
   routes[route - 1]
 end
 
-def choice_train(trains)
-  trains.each_with_index do |train, index|
+def choice_train
+  Train.all.each_with_index do |train, index|
     type = train.type == Train::PASSENGER_TYPE ? 'пассажирский' : 'грузовой'
     puts "#{index + 1} - #{train.number}, тип поезда: #{type}"
   end
   print '> '
   train = gets.to_i
-  trains[train - 1]
+  Train.all[train - 1]
 end
 
-def station_control(routes, stations, route = nil)
+def station_control(routes, route = nil)
   puts 'Выберете маршрут для изменения:'
   route = choice_route(routes) if route.nil?
 
@@ -126,7 +122,7 @@ def station_control(routes, stations, route = nil)
 
   case action
   when 1
-    station = create_station(stations)
+    station = create_station
     routes.delete(route)
     route.add_station(station)
     routes << route
@@ -145,9 +141,9 @@ def station_control(routes, stations, route = nil)
   end
 end
 
-def add_route_to_train(trains, routes)
+def add_route_to_train(routes)
   puts 'Выберете поезд:'
-  train = choice_train(trains)
+  train = choice_train
 
   puts 'Выберете маршрут для поезда:'
   route = choice_route(routes) if route.nil?
@@ -157,37 +153,37 @@ def add_route_to_train(trains, routes)
   puts 'Маршрут для поезда назначен!'
 end
 
-def add_wagons_to_train(trains)
+def add_wagons_to_train
   puts 'Выберете поезд:'
-  train = choice_train(trains)
+  train = choice_train
 
   puts 'Введите кол-во вагонов которое вы хотите добавить:'
   wagon_count = gets.to_i
 
   wagon_count.times do
     wagon = train.type == Train::PASSENGER_TYPE ? PassengerWagon.new : CargoWagon.new
-    train.add_wagon(wagon)
+    puts train.add_wagon(wagon)
   end
   puts 'Вагоны добавлены!'
 end
 
-def remove_wagons_to_train(trains)
+def remove_wagons_to_train
   puts 'Выберете поезд:'
-  train = choice_train(trains)
+  train = choice_train
 
   puts 'Введите кол-во вагонов которое вы хотите добавить:'
   wagon_count = gets.to_i
 
   wagon_count.times do
     wagon = train.type == Train::PASSENGER_TYPE ? PassengerWagon.new : CargoWagon.new
-    train.remove_wagon(wagon)
+    puts train.remove_wagon(wagon)
   end
   puts 'Вагоны отцеплены!'
 end
 
-def move_train(trains)
+def move_train
   puts 'Выберете поезд для перемещения:'
-  train = choice_train(trains)
+  train = choice_train
 
   puts "Текущая станция: #{train.current_station}"
 
@@ -208,16 +204,16 @@ def move_train(trains)
   puts "Поезд перемещен на станцию: #{train.current_station}"
 end
 
-def show_stations(stations)
+def show_stations
   puts 'Список станций:'
-  stations.each_with_index do |station, index|
+  Station.all.each_with_index do |station, index|
     puts " #{index + 1} - #{station.name}"
   end
 end
 
-def show_trains(trains)
-  puts 'Список поездов на станции:'
-  trains.each_with_index do |train, index|
+def show_trains
+  puts 'Список поездов:'
+  Train.all.each_with_index do |train, index|
     type = train.type == Train::PASSENGER_TYPE ? 'пассажирский' : 'грузовой'
     puts "#{index + 1} - #{train.number}, тип поезда: #{type}"
   end
@@ -252,25 +248,25 @@ loop do
   when 'help'
     commands
   when '1'
-    create_station(stations)
+    create_station
   when '2'
-    create_train(trains)
+    create_train
   when '3'
-    create_route(routes, stations)
+    create_route(routes)
   when '4'
-    station_control(routes, stations)
+    station_control(routes)
   when '5'
-    add_route_to_train(trains, routes)
+    add_route_to_train(routes)
   when '6'
-    add_wagons_to_train(trains)
+    add_wagons_to_train
   when '7'
-    remove_wagons_to_train(trains)
+    remove_wagons_to_train
   when '8'
-    move_train(trains)
+    move_train
   when '9'
-    show_stations(stations)
+    show_stations
   when '10'
-    show_trains(trains)
+    show_trains
   else
     puts "Команда #{input} не найдена!"
   end

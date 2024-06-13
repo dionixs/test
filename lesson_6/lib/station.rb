@@ -12,11 +12,15 @@ class Station
     @@stations
   end
 
+  def self.find(name)
+    @@stations.find { |t| t.name == name }
+  end
+
   def initialize(name)
     @name = name
     @trains = []
-    @@stations << self
     validate!
+    @@stations << self
     register_instance
   end
 
