@@ -2,6 +2,7 @@
 
 class Train
   include InstanceCounter
+  include Validatable
   include Vendor
 
   @@trains ||= []
@@ -18,16 +19,21 @@ class Train
 
   INITIAL_STATION = 0
 
+  # три буквы или цифры в любом порядке
+  # необязательный дефис (может быть, а может нет)
+  # и еще 2 буквы или цифры после дефиса
+  NUMBER_FORMAT = /^[a-zа-я0-9]{3}-?[a-zа-я0-9]{2}$/i
+
   attr_reader :number, :type, :speed, :stations
 
   def initialize(number)
     @number = number
-    @type = nil
     @wagons = []
     @stations = []
     @speed = INITIAL_SPEED
     @station = INITIAL_STATION
     @@trains << self
+    validate! if instance_of?(Train)
     register_instance
   end
 
@@ -79,6 +85,25 @@ class Train
 
     @station -= 1
     @stations[@station]
+  end
+
+  def valid?
+    validate!
+    true
+  rescue NotImplementedError
+    false
+  rescue StandardError
+    false
+  end
+
+  protected
+
+  def validate!
+    raise NotImplementedError, 'Unable to create an object of a Class that is a parent!' if instance_of?(Train)
+    raise 'Number of train cannot be blank' if number.nil?
+    raise 'Number of train must be between 5 and 6 characters long' if invalid_length?(number, 5, 6)
+    raise 'Number has invalid format' if number !~ NUMBER_FORMAT
+    raise 'Vendor name must be between 2 and 50 characters long' if !vendor_name.nil? && invalid_length?(vendor_name)
   end
 
   private

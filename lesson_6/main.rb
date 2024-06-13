@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative './lib/validatable'
 require_relative './lib/instance_counter'
 require_relative './lib/vendor'
 require_relative './lib/station'

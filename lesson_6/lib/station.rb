@@ -2,6 +2,7 @@
 
 class Station
   include InstanceCounter
+  include Validatable
 
   attr_reader :name, :trains
 
@@ -15,6 +16,7 @@ class Station
     @name = name
     @trains = []
     @@stations << self
+    validate!
     register_instance
   end
 
@@ -28,6 +30,20 @@ class Station
 
   def trains_by_type(type)
     @trains.filter { |t| t.type == type }.size
+  end
+
+  def valid?
+    validate!
+    true
+  rescue StandardError
+    false
+  end
+
+  protected
+
+  def validate!
+    raise 'Station name cannot be blank' if name.nil?
+    raise 'Station name must be between 2 and 50 characters long' if invalid_length?(name)
   end
 
   private
