@@ -37,8 +37,8 @@ class Train
     @speed = INITIAL_SPEED
     @station = INITIAL_STATION
     validate! if instance_of?(Train)
-    @@trains << self
-    register_instance
+    @@trains << self if valid?
+    register_instance if valid?
   end
 
   def go

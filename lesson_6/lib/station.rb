@@ -20,8 +20,8 @@ class Station
     @name = name
     @trains = []
     validate!
-    @@stations << self
-    register_instance
+    @@stations << self if valid?
+    register_instance if valid?
   end
 
   def take_train(train)
