@@ -13,15 +13,6 @@ class Wagon
     validate!
   end
 
-  def valid?
-    validate!
-    true
-  rescue NotImplementedError
-    false
-  rescue StandardError
-    false
-  end
-
   protected
 
   def validate!

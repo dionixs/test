@@ -11,7 +11,7 @@ class Route
     @end_station = end_station
     @stations = [start_station, end_station]
     validate!
-    register_instance if valid?
+    register_instance
   end
 
   def add_station(station)
@@ -27,13 +27,6 @@ class Route
 
   def all_stations
     @stations.each_with_index { |s, i| print @stations.size > (i + 1) ? "#{s.name} > " : s.name }
-  end
-
-  def valid?
-    validate!
-    true
-  rescue StandardError
-    false
   end
 
   protected

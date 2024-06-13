@@ -36,9 +36,9 @@ class Train
     @stations = []
     @speed = INITIAL_SPEED
     @station = INITIAL_STATION
-    validate! if instance_of?(Train)
-    @@trains << self if valid?
-    register_instance if valid?
+    validate!
+    @@trains << self
+    register_instance
   end
 
   def go
@@ -89,15 +89,6 @@ class Train
 
     @station -= 1
     @stations[@station]
-  end
-
-  def valid?
-    validate!
-    true
-  rescue NotImplementedError
-    false
-  rescue StandardError
-    false
   end
 
   protected

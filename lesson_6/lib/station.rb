@@ -20,8 +20,8 @@ class Station
     @name = name
     @trains = []
     validate!
-    @@stations << self if valid?
-    register_instance if valid?
+    @@stations << self
+    register_instance
   end
 
   def take_train(train)
@@ -34,13 +34,6 @@ class Station
 
   def trains_by_type(type)
     @trains.filter { |t| t.type == type }.size
-  end
-
-  def valid?
-    validate!
-    true
-  rescue StandardError
-    false
   end
 
   protected

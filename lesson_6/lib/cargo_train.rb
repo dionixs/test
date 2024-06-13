@@ -2,9 +2,8 @@
 
 class CargoTrain < Train
   def initialize(number)
-    super
     @type = CARGO_TYPE
-    validate!
+    super
   end
 
   protected
