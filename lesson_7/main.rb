@@ -328,48 +328,52 @@ end
 puts 'Добро пожаловать в систему управления железнодорожными станциями!'
 puts 'Введите help чтобы посмотреть список команд'
 
-loop do
-  print '> '
-  input = gets&.strip
+begin
+  loop do
+    print '> '
+    input = gets&.strip
 
-  begin
-    case input
-    when 'exit'
-      break
-    when 'help'
-      commands
-    when '1'
-      create_station
-    when '2'
-      create_train
-    when '3'
-      create_route(routes)
-    when '4'
-      station_control(routes)
-    when '5'
-      add_route_to_train(routes)
-    when '6'
-      add_wagons_to_train
-    when '7'
-      remove_wagons_to_train
-    when '8'
-      move_train
-    when '9'
-      show_stations
-    when '10'
-      show_trains
-    when '11'
-      show_wagons
-    else
-      puts "Команда #{input} не найдена!"
+    begin
+      case input
+      when 'exit'
+        break
+      when 'help'
+        commands
+      when '1'
+        create_station
+      when '2'
+        create_train
+      when '3'
+        create_route(routes)
+      when '4'
+        station_control(routes)
+      when '5'
+        add_route_to_train(routes)
+      when '6'
+        add_wagons_to_train
+      when '7'
+        remove_wagons_to_train
+      when '8'
+        move_train
+      when '9'
+        show_stations
+      when '10'
+        show_trains
+      when '11'
+        show_wagons
+      else
+        puts "Команда #{input} не найдена!"
+      end
+    rescue StandardError => e
+      attempt += 1
+      puts "Возникла ошибка: #{e.message}. Попробуйте еще раз!"
+      puts "Попыток: #{attempt}" if attempt.positive?
+      retry if attempt < 3
+      puts 'Достигнуто максимальное кол-во попыток. Попробуйте позже.'
+      attempt = 0
+      next
     end
-  rescue StandardError => e
-    attempt += 1
-    puts "Возникла ошибка: #{e.message}. Попробуйте еще раз!"
-    puts "Попыток: #{attempt}" if attempt.positive?
-    retry if attempt < 3
-    puts 'Достигнуто максимальное кол-во попыток. Попробуйте позже.'
-    attempt = 0
-    next
   end
+rescue Interrupt
+  # Ignored
 end
