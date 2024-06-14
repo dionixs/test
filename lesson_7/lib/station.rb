@@ -36,6 +36,14 @@ class Station
     @trains.filter { |t| t.type == type }.size
   end
 
+  def each_train(&block)
+    @trains.each { |t| block.call(t) }
+  end
+
+  def each_train_with_index(&block)
+    @trains.each_with_index { |t, i| block.call(t, i) }
+  end
+
   protected
 
   def validate!

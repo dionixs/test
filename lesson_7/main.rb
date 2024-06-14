@@ -22,9 +22,11 @@ def create_station
   print '> '
   name = gets.strip.capitalize
 
-  if Station.find(name)
+  station = Station.find(name)
+
+  if station
     puts 'Станция уже существует!'
-    Station.find(name)
+    station
   else
     puts 'Станция успешно создана!'
     Station.new(name)
@@ -107,7 +109,7 @@ end
 def choice_train
   Train.all.each_with_index do |train, index|
     type = train.type == Train::PASSENGER_TYPE ? 'пассажирский' : 'грузовой'
-    puts "#{index + 1} - #{train.number}, тип поезда: #{type}"
+    puts "\t#{index + 1}. #{train.number}, тип поезда: #{type}"
   end
   print '> '
   train = gets.to_i
@@ -157,16 +159,33 @@ def add_route_to_train(routes)
   puts 'Маршрут для поезда назначен!'
 end
 
-def add_wagons_to_train
-  puts 'Выберете поезд:'
-  train = choice_train
+def add_wagons_to_train(train = nil)
+  if train.nil?
+    puts 'Выберете поезд:'
+    train = choice_train
+  end
 
   puts 'Введите кол-во вагонов которое вы хотите добавить:'
+  print '> '
   wagon_count = gets.to_i
 
+  if train.type == Wagon::PASSENGER_TYPE
+    puts 'Укажите кол-во мест в вагоне:'
+    print '> '
+    total_seats = gets.to_i
+  else
+    puts 'Укажите общий объем вагона:'
+    print '> '
+    total_volume = gets.to_i
+  end
+
   wagon_count.times do
-    wagon = train.type == Train::PASSENGER_TYPE ? PassengerWagon.new : CargoWagon.new
-    puts train.add_wagon(wagon)
+    wagon = if train.type == Train::PASSENGER_TYPE
+              PassengerWagon.new { |p| p.total_seats = total_seats }
+            else
+              CargoWagon.new { |p| p.total_volume = total_volume }
+            end
+    train.add_wagon(wagon)
   end
   puts 'Вагоны добавлены!'
 end
@@ -205,6 +224,26 @@ def move_train
     puts 'Ошибка в выборе действия!'
   end
 
+  if train.wagons.empty?
+    puts 'У поезда нет вагонов! Необходимо добавить вагоны к поезду!'
+    add_wagons_to_train(train)
+  end
+
+  if train.type == Train::PASSENGER_TYPE
+    train.wagons.each do |wagon|
+      rand(0..wagon.total_seats).times do
+        wagon.take_seat
+      end
+    end
+    puts 'Произошла посадка пассажиров в поезд'
+  else
+    train.wagons.each do |wagon|
+      volume = rand(0..wagon.total_volume)
+      wagon.take_volume(volume)
+    end
+    puts 'Произошла погрузка в поезд'
+  end
+
   puts "Поезд перемещен на станцию: #{train.current_station}"
 end
 
@@ -216,10 +255,56 @@ def show_stations
 end
 
 def show_trains
-  puts 'Список поездов:'
-  Train.all.each_with_index do |train, index|
+  puts 'Показать список поездов для всех станций или для определенной? (Y/n)'
+  print '> '
+  input = gets.chomp.downcase
+
+  if input == 'y'
+    Station.all.each do |station|
+      puts "Список поездов на станции: #{station.name}"
+
+      if station.trains.empty?
+        puts "\tПоездов на станции нет!"
+      else
+        display_trains_for_station(station)
+      end
+    end
+  else
+    puts 'Выберете станцию из списка :'
+    show_stations
+    print '> '
+    station = gets.to_i
+    station = Station.all[station - 1]
+
+    puts "Список поездов на станции: #{station.name}"
+    display_trains_for_station(station)
+  end
+end
+
+def display_trains_for_station(station)
+  station.each_train_with_index do |train, index|
     type = train.type == Train::PASSENGER_TYPE ? 'пассажирский' : 'грузовой'
-    puts "#{index + 1} - #{train.number}, тип поезда: #{type}"
+    index += 1
+    wagons = train.wagons.size
+    puts "\t#{index}. номер поезда:  #{train.number}, тип поезда: #{type}, кол-во вагонов: #{wagons}"
+  end
+end
+
+def show_wagons
+  puts 'Выберете поезд для просмотра списка вагонов:'
+  train = choice_train
+
+  puts "Список вагонов у поезда #{train.number}"
+
+  train.each_wagon_with_index do |wagon, index|
+    type = wagon.type == Train::PASSENGER_TYPE ? 'пассажирский' : 'грузовой'
+    index += 1
+    puts "\t#{index}. номер вагона: #{wagon.number} , тип вагона: #{type}"
+    if wagon.type == Train::PASSENGER_TYPE
+      puts "\t\tкол-во свободных мест: #{wagon.free_seats}, занятых мест: #{wagon.busy_seats}"
+    else
+      puts "\t\tкол-во свободного объема: #{wagon.free_volume}, занятого объема: #{wagon.busy_volume}"
+    end
   end
 end
 
@@ -235,6 +320,7 @@ def commands
   puts ' 8 - Переместить поезд по маршруту'
   puts ' 9 - Просмотреть список станций'
   puts ' 10 - Просмотреть список поездов на станции'
+  puts ' 11 - Просмотреть список вагонов у поезда'
   puts ' help - Список команд'
   puts ' exit - Выход'
 end
@@ -244,7 +330,7 @@ puts 'Введите help чтобы посмотреть список кома�
 
 loop do
   print '> '
-  input = gets.strip
+  input = gets&.strip
 
   begin
     case input
@@ -272,6 +358,8 @@ loop do
       show_stations
     when '10'
       show_trains
+    when '11'
+      show_wagons
     else
       puts "Команда #{input} не найдена!"
     end

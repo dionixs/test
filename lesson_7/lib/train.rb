@@ -28,7 +28,8 @@ class Train
   # и еще 2 буквы или цифры после дефиса
   NUMBER_FORMAT = /^[a-zа-я0-9]{3}-?[a-zа-я0-9]{2}$/i
 
-  attr_reader :number, :type, :speed, :stations
+  attr_reader :number, :type, :wagons,
+              :speed, :stations
 
   def initialize(number)
     @number = number
@@ -89,6 +90,14 @@ class Train
 
     @station -= 1
     @stations[@station]
+  end
+
+  def each_wagon(&block)
+    @wagons.each { |w| block.call(w) }
+  end
+
+  def each_wagon_with_index(&block)
+    @wagons.each_with_index { |w, i| block.call(w, i) }
   end
 
   protected
