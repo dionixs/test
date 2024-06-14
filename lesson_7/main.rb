@@ -331,7 +331,7 @@ puts 'Введите help чтобы посмотреть список кома�
 begin
   loop do
     print '> '
-    input = gets&.strip
+    input = gets&.strip&.downcase
 
     begin
       case input
