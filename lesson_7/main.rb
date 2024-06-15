@@ -230,14 +230,14 @@ def move_train
   end
 
   if train.type == Train::PASSENGER_TYPE
-    train.wagons.each do |wagon|
+    train.each_wagon do |wagon|
       rand(0..wagon.total_seats).times do
         wagon.take_seat
       end
     end
     puts 'Произошла посадка пассажиров в поезд'
   else
-    train.wagons.each do |wagon|
+    train.each_wagon do |wagon|
       volume = rand(0..wagon.total_volume)
       wagon.take_volume(volume)
     end
